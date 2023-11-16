@@ -26,12 +26,16 @@ stages:
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
-    - bash: echo '$(dockerPortNumber)'
+    - bash: |
+        echo '$(dockerPortNumber)'
+        echo "##vso[task.setvariable variable=dockerPortNumber;isOutput=true]$(dockerPortNumber)"
+      displayName: 'SET VARIABLE FOR NEXT STEP'
+      name: DockerPort
 - stage: C
   dependsOn: B
   jobs:
   - job: C1
     variables:
-      dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
+      dockerPortNumber: $[stageDependencies.B.B1.outputs['DockerPort.portNumber']]
     steps:
       - bash: echo '$(dockerPortNumber)'
