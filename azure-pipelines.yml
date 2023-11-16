@@ -16,13 +16,19 @@ stages:
         echo "Random Port: $RANDOM_PORT"
 
         # Store the random port in an environment variable for later use
-        echo "##vso[task.setvariable variable=portNumber]$RANDOM_PORT"
+        echo "##vso[task.setvariable variable=portNumber;isOutput=true]$RANDOM_PORT"
       displayName: 'GENERATE RANDOM PORT'
       name: DockerPort
 - stage: B
   dependsOn: A
   jobs:
   - job: B1
+    steps:
+    - bash: echo 'Trigger B'
+- stage: C
+  dependsOn: B
+  jobs:
+  - job: C1
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
