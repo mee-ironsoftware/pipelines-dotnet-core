@@ -23,8 +23,10 @@ stages:
   dependsOn: A
   jobs:
   - job: B1
+    variables:
+      dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
-    - bash: echo 'Trigger B'
+    - bash: echo '$(dockerPortNumber)'
 - stage: C
   dependsOn: B
   jobs:
@@ -32,4 +34,4 @@ stages:
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
-      - bash: echo $(dockerPortNumber)
+      - bash: echo '$(dockerPortNumber)'
