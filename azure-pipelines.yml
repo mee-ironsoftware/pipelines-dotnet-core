@@ -28,7 +28,7 @@ stages:
     steps:
     - bash: |
         echo '$(dockerPortNumber)'
-        echo "##vso[task.setvariable variable=dockerPortNumber;isOutput=true]$dockerPortNumber"
+        echo "##vso[task.setvariable variable=portNumber;isOutput=true]$dockerPortNumber"
       displayName: 'SET VARIABLE FOR NEXT STEP'
       name: DockerPort
     - bash: echo '$(DockerPort.portNumber)'
