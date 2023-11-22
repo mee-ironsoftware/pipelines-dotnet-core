@@ -37,3 +37,4 @@ stages:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
       - bash: echo '$(dockerPortNumber)'
+      - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
