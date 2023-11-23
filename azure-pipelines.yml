@@ -38,3 +38,6 @@ stages:
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
+      - bash: echo '$(Build.RequestedForEmail)'
+      - bash: echo $(Agent.JobStatus)
+
