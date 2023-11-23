@@ -40,4 +40,6 @@ stages:
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
       - bash: echo '$(Build.RequestedForEmail)'
       - bash: echo $(Agent.JobStatus)
+      - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
+      
 
