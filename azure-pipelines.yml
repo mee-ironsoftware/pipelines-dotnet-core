@@ -11,6 +11,7 @@ parameters:
     default: false
   - name: makeBFailed
     displayName: Make stage B failed
+    type: boolean
     default: false
 
 pool:
