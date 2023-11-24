@@ -50,7 +50,7 @@ stages:
   dependsOn:
   - A
   - B
-  condition: succeededOrFailed()
+  condition: always()
   jobs:
   - job: C1
     variables:
