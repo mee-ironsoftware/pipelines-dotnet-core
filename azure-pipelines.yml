@@ -19,6 +19,7 @@ pool:
 
 stages:
 - stage: A
+  condition: eq(${{ parameters.skipA }}, false)
   jobs:
   - job: A1
     steps:
@@ -35,6 +36,7 @@ stages:
       name: DockerPort
 - stage: B
   dependsOn: A
+  condition: eq(${{ parameters.skipB }}, false)
   jobs:
   - job: B1
     variables:
