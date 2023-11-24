@@ -1,5 +1,18 @@
 trigger: none
 
+parameters:
+  - name: skipA
+    displayName: Skip stage A
+    type: boolean
+    default: false
+  - name: skipB
+    displayName: Skip stage B
+    type: boolean
+    default: false
+  - name: makeBFailed
+    displayName: Make stage B failed
+    default: false
+
 pool:
   vmImage: ubuntu-latest
 
@@ -27,10 +40,14 @@ stages:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
     - bash: echo '$(dockerPortNumber)'
+    - bash: exit 1
+      displayName: Fail this step build
+      condition: eq(${{ parameters.makeBFailed }}, true)
 - stage: C
   dependsOn:
   - A
   - B
+  condition: succeededOrFailed()
   jobs:
   - job: C1
     variables:
