@@ -43,6 +43,8 @@ stages:
           echo "Test1 failed or was skipped."
           echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]false"
         fi
+      condition: succeededOrFailed()
+      displayName: 'Check Job Status'
 - stage: B
   dependsOn: A
   condition: eq(${{ parameters.skipB }}, false)
@@ -61,6 +63,8 @@ stages:
           echo "Test1 failed or was skipped."
           echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]false"
         fi
+      condition: succeededOrFailed()
+      displayName: 'Check Job Status'
 - stage: C
   dependsOn:
   - A
