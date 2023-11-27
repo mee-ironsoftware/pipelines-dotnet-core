@@ -25,6 +25,7 @@ stages:
 
 - stage: A
   condition: eq(${{ parameters.skipA }}, false)
+  dependsOn: []
   jobs:
   - job: A1
     steps:
@@ -81,6 +82,7 @@ stages:
 
 - stage: B
   condition: eq(${{ parameters.skipB }}, false)
+  dependsOn: []
   jobs:
   - job: B1
     variables:
