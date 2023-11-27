@@ -49,10 +49,16 @@ stages:
       condition: succeededOrFailed()
       name: testPassed
       displayName: 'Check Job Status'
-- stage: SubA
+- stage: SubA1
   dependsOn: A
   jobs:
-  - job: SubA1
+  - job: SubA1Job
+    steps:
+    - checkout: none
+- stage: SubA2
+  dependsOn: A
+  jobs:
+  - job: SubA2Job
     steps:
     - checkout: none
     - bash: exit 1
@@ -76,56 +82,87 @@ stages:
       condition: succeededOrFailed()
       name: testPassed
       displayName: 'Check Job Status'
-- stage: SubB
+- stage: SubB1
   dependsOn: B
   jobs:
-  - job: SubB1
+  - job: SubB1Job
     steps:
     - checkout: none
     - bash: exit 1
       displayName: Fail this step build
       condition: eq(${{ parameters.makeBFailed }}, true)
-      
+- stage: SubB2
+  dependsOn: B
+  jobs:
+  - job: SubB2Job
+    steps:
+    - checkout: none
 
 
-- stage: FailedAB
+- stage: FailedA
   condition: failed()
   dependsOn:
-  - SubA
-  - SubB
-  displayName: 'Trigger when SubA and SubB failed'
+  - SubA1
+  - SubA2
+  displayName: 'Trigger when SubA1 and SubA2 failed'
   jobs:
-  - job: FailedABJob
+  - job: FailedAJob
     steps:
     - checkout: none
-    - bash: echo 'dependsOn SubA and SubB and condition is failed'
-- stage: succeededAB
-  condition: succeeded()
+    - bash: echo 'dependsOn SubA1 and SubA2 and condition is failed'
+    - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
+      name: testPassed
+- stage: succeededA
+  condition: or(succeeded(), eq(${{ parameters.skipA }}, false))
   dependsOn:
-  - SubA
-  - SubB
-  displayName: 'Trigger when SubA and SubB succeeded'
+  - SubA1
+  - SubA2
+  displayName: 'Trigger when SubA1 and SubA2 succeeded'
   jobs:
-  - job: SuceededABJob
+  - job: SuceededAJob
     steps:
     - checkout: none
-    - bash: echo 'dependsOn SubA and SubB and condition is succeeded'
+    - bash: echo 'dependsOn SubA1 and SubA2 and condition is succeeded'
+
+- stage: FailedB
+  condition: failed()
+  dependsOn:
+  - SubB1
+  - SubB2
+  displayName: 'Trigger when SubB1 and SubB2 failed'
+  jobs:
+  - job: FailedBJob
+    steps:
+    - checkout: none
+    - bash: echo 'dependsOn SubB1 and SubB2 and condition is failed'
+    - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
+      name: testPassed
+- stage: succeededA
+  condition: or(succeeded(), eq(${{ parameters.skipB }}, false))
+  dependsOn:
+  - SubB1
+  - SubB2
+  displayName: 'Trigger when SubB1 and SubB2 succeeded'
+  jobs:
+  - job: SuceededBJob
+    steps:
+    - checkout: none
+    - bash: echo 'dependsOn SubB1 and SubB2 and condition is succeeded'
+
 
 - stage: C
   dependsOn:
-  - SubA
-  - SubB
+  - FailedA
+  - FailedB
   condition: always()
   jobs:
   - job: C1
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
       allTestsPassed: $[or(
-          eq(stageDependencies.A.A1.outputs['testPassed.testPassed'], 'Failed'),
-          eq(stageDependencies.B.B1.outputs['testPassed.testPassed'], 'Failed')
+          eq(stageDependencies.FailedA.FailedAJob.outputs['testPassed.testPassed'], 'Failed'),
+          eq(stageDependencies.FailedB.FailedBJob.outputs['testPassed.testPassed'], 'Failed')
         )]
-      testPassedA: $[stageDependencies.A.A1.outputs['testPassed.testPassed']]
-      testPassedB: $[stageDependencies.B.B1.outputs['testPassed.testPassed']]
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
