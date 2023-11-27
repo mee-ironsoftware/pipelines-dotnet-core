@@ -38,9 +38,7 @@ stages:
         # Check the status of A1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "A1 failed or was skipped."
-          echo "##vso[task.setvariable variable=testPassed;isOutput=true]false"
-        else
-          echo "##vso[task.setvariable variable=testPassed;isOutput=true]true"
+          echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
         fi
       condition: succeededOrFailed()
       name: testPassed
@@ -61,9 +59,7 @@ stages:
         # Check the status of B1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "B1 failed or was skipped."
-          echo "##vso[task.setvariable variable=testPassed;isOutput=true]false"
-        else
-          echo "##vso[task.setvariable variable=testPassed;isOutput=true]true"
+          echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
         fi
       condition: succeededOrFailed()
       name: testPassed
@@ -77,9 +73,9 @@ stages:
   - job: C1
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
-      allTestsPassed: $[and(
-          eq(stageDependencies.A.A1.outputs['testPassed.testPassed'], true),
-          eq(stageDependencies.B.B1.outputs['testPassed.testPassed'], true)
+      allTestsPassed: $[or(
+          eq(stageDependencies.A.A1.outputs['testPassed.testPassed'], 'Failed'),
+          eq(stageDependencies.B.B1.outputs['testPassed.testPassed'], 'Failed')
         )]
     steps:
       - bash: echo '$(dockerPortNumber)'
