@@ -149,9 +149,15 @@ stages:
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       - bash: |
           echo "All Tests Passed ::: $(allTestsPassed)"
-          PIPELINE_STATUS=$(($allTestsPassed ? 'Succeeded' : 'Failed'))
+          
+          if [ "$(allTestsPassed)" = True ]; then
+            PIPELINE_STATUS='Succeeded'
+          else
+            PIPELINE_STATUS='Failed'
+          fi
           echo "Pipeline status  ::: $PIPELINE_STATUS"
-          if [ $(allTestsPassed) == False ]; then
+
+          if [ $(allTestsPassed) = False ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
           else
