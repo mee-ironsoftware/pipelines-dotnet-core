@@ -73,9 +73,10 @@ stages:
   - job: C1
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
-      allTestsPassed: and(
-        $[stageDependencies.A.A1.outputs['testPassed.testPassed']],
-        $[stageDependencies.B.B1.outputs['testPassed.testPassed']])
+      allTestsPassed: $[and(
+          eq(stageDependencies.A.A1.outputs['testPassed.testPassed'], true),
+          eq(stageDependencies.B.B1.outputs['testPassed.testPassed'], true)
+        )]
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
