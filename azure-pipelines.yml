@@ -156,8 +156,8 @@ stages:
 
 - stage: C
   dependsOn:
-  - FailedA
-  - FailedB
+  - succeededA
+  - succeededB
   condition: always()
   jobs:
   - job: C1
