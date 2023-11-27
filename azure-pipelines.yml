@@ -60,7 +60,6 @@ stages:
       condition: eq(${{ parameters.makeAFailed }}, true)
 
 - stage: B
-  dependsOn: A
   condition: eq(${{ parameters.skipB }}, false)
   jobs:
   - job: B1
