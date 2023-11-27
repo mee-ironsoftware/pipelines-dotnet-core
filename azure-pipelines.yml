@@ -81,7 +81,7 @@ stages:
       - bash: echo $(Agent.JobStatus)
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       - script: |
-          if [ "$(AllTestsPassed)" == "false" ]; then
+          if [ "$(allTestsPassed)" == "false" ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
           else
