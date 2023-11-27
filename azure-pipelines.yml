@@ -62,11 +62,12 @@ stages:
         # Check the status of B1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "B1 failed or was skipped."
-          echo "##vso[task.setvariable variable=allTestsPassed]false"
+          echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]false"
         fi
-        echo "All Tests Passed ::: $(allTestsPassed)"
       condition: succeededOrFailed()
       displayName: 'Check Job Status'
+    - bash: |
+        echo "All Tests Passed ::: $(allTestsPassed)"
 - stage: C
   dependsOn:
   - A
