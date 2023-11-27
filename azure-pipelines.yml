@@ -68,6 +68,7 @@ stages:
       displayName: 'Check Job Status'
     - bash: |
         echo "All Tests Passed ::: $(allTestsPassed)"
+      condition: succeededOrFailed()
 - stage: C
   dependsOn:
   - A
