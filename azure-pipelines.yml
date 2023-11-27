@@ -177,7 +177,7 @@ stages:
           echo "All Tests Passed ::: $(allTestsPassed)"
           echo "testPassedA ::: $(testPassedA)"
           echo "testPassedB ::: $(testPassedB)"
-          if [ "$(allTestsPassed)" == "false" ]; then
+          if [ $(allTestsPassed) == false ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
           else
