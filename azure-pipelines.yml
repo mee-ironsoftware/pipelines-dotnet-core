@@ -14,6 +14,9 @@ parameters:
     type: boolean
     default: false
 
+variables:
+  allTestsPassed: true
+
 pool:
   vmImage: ubuntu-latest
 
@@ -34,6 +37,12 @@ stages:
         echo "##vso[task.setvariable variable=portNumber;isOutput=true]$RANDOM_PORT"
       displayName: 'GENERATE RANDOM PORT'
       name: DockerPort
+    - bash: |
+        # Check the status of Test1
+        if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
+          echo "Test1 failed or was skipped."
+          echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]false"
+        fi
 - stage: B
   dependsOn: A
   condition: eq(${{ parameters.skipB }}, false)
@@ -46,6 +55,12 @@ stages:
     - bash: exit 1
       displayName: Fail this step build
       condition: eq(${{ parameters.makeBFailed }}, true)
+    - bash: |
+        # Check the status of Test1
+        if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
+          echo "Test1 failed or was skipped."
+          echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]false"
+        fi
 - stage: C
   dependsOn:
   - A
@@ -61,16 +76,10 @@ stages:
       - bash: echo '$(Build.RequestedForEmail)'
       - bash: echo $(Agent.JobStatus)
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
-      - bash: |
-          echo "Stage A :::: $(stageDependencies.A.JobStatus)"
-          echo "Stage B :::: $(stageDependencies.B.JobStatus)"
-          # Check the status of all dependent jobs
-          if [ "$(stageDependencies.A.JobStatus)" == "Succeeded" ] &&
-            [ "$(stageDependencies.B.JobStatus)" == "Succeeded" ]; then
-            echo "All dependent jobs succeeded!"
-          else
+      - script: |
+          if [ "$(AllTestsPassed)" == "false" ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
+          else
+            echo "All dependent jobs succeeded!"
           fi
-      
-
