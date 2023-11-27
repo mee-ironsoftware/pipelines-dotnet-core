@@ -5,6 +5,10 @@ parameters:
     displayName: Skip stage A
     type: boolean
     default: false
+  - name: makeAFailed
+    displayName: Make stage A failed
+    type: boolean
+    default: false
   - name: skipB
     displayName: Skip stage B
     type: boolean
@@ -18,11 +22,13 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
+
 - stage: A
   condition: eq(${{ parameters.skipA }}, false)
   jobs:
   - job: A1
     steps:
+    - checkout: none
     - bash: |
         # Generate a random port number between 3000 and 6000
         export RANDOM_PORT=$((RANDOM % (6000-3000+1) + 3000))
@@ -43,6 +49,16 @@ stages:
       condition: succeededOrFailed()
       name: testPassed
       displayName: 'Check Job Status'
+- stage: SubA
+  dependsOn: A
+  jobs:
+  - job: SubA1
+    steps:
+    - checkout: none
+    - bash: exit 1
+      displayName: Fail this step build
+      condition: eq(${{ parameters.makeAFailed }}, true)
+
 - stage: B
   dependsOn: A
   condition: eq(${{ parameters.skipB }}, false)
@@ -52,9 +68,6 @@ stages:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
     steps:
     - bash: echo '$(dockerPortNumber)'
-    - bash: exit 1
-      displayName: Fail this step build
-      condition: eq(${{ parameters.makeBFailed }}, true)
     - bash: |
         # Check the status of B1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
@@ -64,10 +77,45 @@ stages:
       condition: succeededOrFailed()
       name: testPassed
       displayName: 'Check Job Status'
+- stage: SubB
+  dependsOn: B
+  jobs:
+  - job: SubB1
+    steps:
+    - checkout: none
+    - bash: exit 1
+      displayName: Fail this step build
+      condition: eq(${{ parameters.makeBFailed }}, true)
+      
+
+
+- stage: FailedAB
+  condition: failed()
+  dependsOn:
+  - SubA
+  - SubB
+  displayName: 'Trigger when SubA and SubB failed'
+  jobs:
+  - job: FailedABJob
+    steps:
+    - checkout: none
+    - bash: echo 'dependsOn SubA and SubB and condition is failed'
+- stage: succeededAB
+  condition: succeeded()
+  dependsOn:
+  - SubA
+  - SubB
+  displayName: 'Trigger when SubA and SubB succeeded'
+  jobs:
+  - job: SuceededABJob
+    steps:
+    - checkout: none
+    - bash: echo 'dependsOn SubA and SubB and condition is succeeded'
+
 - stage: C
   dependsOn:
-  - A
-  - B
+  - SubA
+  - SubB
   condition: always()
   jobs:
   - job: C1
