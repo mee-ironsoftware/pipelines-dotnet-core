@@ -61,5 +61,16 @@ stages:
       - bash: echo '$(Build.RequestedForEmail)'
       - bash: echo $(Agent.JobStatus)
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
+      - bash: |
+          echo "Stage A :::: $(A.JobStatus)"
+          echo "Stage B :::: $(B.JobStatus)"
+          # Check the status of all dependent jobs
+          if [ "$(A.JobStatus)" == "Succeeded" ] &&
+            [ "$(B.JobStatus)" == "Succeeded" ]; then
+            echo "All dependent jobs succeeded!"
+          else
+            echo "Some dependent jobs failed or were skipped."
+            exit 1
+          fi
       
 
