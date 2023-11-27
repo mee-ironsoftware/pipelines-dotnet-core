@@ -14,9 +14,6 @@ parameters:
     type: boolean
     default: false
 
-variables:
-  allTestsPassed: true
-
 pool:
   vmImage: ubuntu-latest
 
@@ -41,10 +38,10 @@ stages:
         # Check the status of A1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "A1 failed or was skipped."
-          echo "##vso[task.setvariable variable=allTestsPassed]false"
+          echo "##vso[task.setvariable variable=testPassed;isOutput=true]false"
         fi
-        echo "All Tests Passed ::: $(allTestsPassed)"
       condition: succeededOrFailed()
+      name: testPassed
       displayName: 'Check Job Status'
 - stage: B
   dependsOn: A
@@ -62,14 +59,11 @@ stages:
         # Check the status of B1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "B1 failed or was skipped."
-          echo "##vso[task.setvariable variable=allTestsPassed]false"
+          echo "##vso[task.setvariable variable=testPassed;isOutput=true]false"
         fi
       condition: succeededOrFailed()
+      name: testPassed
       displayName: 'Check Job Status'
-    - bash: |
-        echo "All Tests Passed ::: $(allTestsPassed)"
-        echo "##vso[task.setvariable variable=allTestsPassed;isOutput=true]$(allTestsPassed)"
-      condition: succeededOrFailed()
 - stage: C
   dependsOn:
   - A
@@ -79,7 +73,9 @@ stages:
   - job: C1
     variables:
       dockerPortNumber: $[stageDependencies.A.A1.outputs['DockerPort.portNumber']]
-      allTestsPassed: $[stageDependencies.B.B1.outputs['allTestsPassed']]
+      allTestsPassed: and(
+        $[stageDependencies.A.A1.outputs['testPassed.testPassed']],
+        $[stageDependencies.B.B1.outputs['testPassed.testPassed']])
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
