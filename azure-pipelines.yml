@@ -38,9 +38,9 @@ stages:
       displayName: 'GENERATE RANDOM PORT'
       name: DockerPort
     - bash: |
-        # Check the status of Test1
+        # Check the status of A1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
-          echo "Test1 failed or was skipped."
+          echo "A1 failed or was skipped."
           echo "##vso[task.setvariable variable=allTestsPassed]false"
         fi
         echo "All Tests Passed ::: $(allTestsPassed)"
@@ -59,7 +59,7 @@ stages:
       displayName: Fail this step build
       condition: eq(${{ parameters.makeBFailed }}, true)
     - bash: |
-        # Check the status of Test1
+        # Check the status of B1
         if [ "$(Agent.JobStatus)" != "Succeeded" ]; then
           echo "B1 failed or was skipped."
           echo "##vso[task.setvariable variable=allTestsPassed]false"
