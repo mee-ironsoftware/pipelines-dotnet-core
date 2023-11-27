@@ -99,19 +99,6 @@ stages:
     - checkout: none
 
 
-# - stage: FailedA
-#   condition: failed()
-#   dependsOn:
-#   - SubA1
-#   - SubA2
-#   displayName: 'Trigger when SubA1 and SubA2 failed'
-#   jobs:
-#   - job: FailedAJob
-#     steps:
-#     - checkout: none
-#     - bash: echo 'dependsOn SubA1 and SubA2 and condition is failed'
-#     - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
-#       name: testPassed
 - stage: succeededA
   condition: or(succeeded(), eq(${{ parameters.skipA }}, false))
   dependsOn:
@@ -126,19 +113,6 @@ stages:
     - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Succeeded"
       name: testPassed
 
-# - stage: FailedB
-#   condition: failed()
-#   dependsOn:
-#   - SubB1
-#   - SubB2
-#   displayName: 'Trigger when SubB1 and SubB2 failed'
-#   jobs:
-#   - job: FailedBJob
-#     steps:
-#     - checkout: none
-#     - bash: echo 'dependsOn SubB1 and SubB2 and condition is failed'
-#     - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Failed"
-#       name: testPassed
 - stage: succeededB
   condition: or(succeeded(), eq(${{ parameters.skipB }}, false))
   dependsOn:
@@ -175,8 +149,6 @@ stages:
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       - script: |
           echo "All Tests Passed ::: $(allTestsPassed)"
-          echo "testPassedA ::: $(testPassedA)"
-          echo "testPassedB ::: $(testPassedB)"
           if [ $(allTestsPassed) == false ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
