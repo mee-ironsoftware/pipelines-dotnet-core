@@ -77,6 +77,8 @@ stages:
           eq(stageDependencies.A.A1.outputs['testPassed.testPassed'], 'Failed'),
           eq(stageDependencies.B.B1.outputs['testPassed.testPassed'], 'Failed')
         )]
+      testPassedA: $[stageDependencies.A.A1.outputs['testPassed.testPassed']]
+      testPassedB: $[stageDependencies.B.B1.outputs['testPassed.testPassed']]
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
@@ -85,6 +87,8 @@ stages:
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       - script: |
           echo "All Tests Passed ::: $(allTestsPassed)"
+          echo "testPassedA ::: $(testPassedA)"
+          echo "testPassedB ::: $(testPassedB)"
           if [ "$(allTestsPassed)" == "false" ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
