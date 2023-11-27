@@ -100,7 +100,7 @@ stages:
 
 
 - stage: succeededA
-  condition: or(succeeded(), eq(${{ parameters.skipA }}, false))
+  condition: or(succeeded(), eq(${{ parameters.skipA }}, true))
   dependsOn:
   - SubA1
   - SubA2
@@ -114,7 +114,7 @@ stages:
       name: testPassed
 
 - stage: succeededB
-  condition: or(succeeded(), eq(${{ parameters.skipB }}, false))
+  condition: or(succeeded(), eq(${{ parameters.skipB }}, true))
   dependsOn:
   - SubB1
   - SubB2
@@ -141,6 +141,12 @@ stages:
           eq(stageDependencies.succeededA.suceededAJob.outputs['testPassed.testPassed'], 'Succeeded'),
           eq(stageDependencies.succeededB.suceededBJob.outputs['testPassed.testPassed'], 'Succeeded')
         )]
+      status: $[if(and(
+                eq(stageDependencies.succeededA.suceededAJob.outputs['testPassed.testPassed'], 'Succeeded'), 
+                eq(stageDependencies.succeededB.suceededBJob.outputs['testPassed.testPassed'], 'Succeeded')), 
+                'Succeeded', 
+                'Failed'
+              )]
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
@@ -149,7 +155,8 @@ stages:
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       - script: |
           echo "All Tests Passed ::: $(allTestsPassed)"
-          if [ $(allTestsPassed) == false ]; then
+          echo "Status ::: $(status)"
+          if [ $(allTestsPassed) == False ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
           else
