@@ -65,6 +65,20 @@ stages:
       displayName: Fail this step build
       condition: eq(${{ parameters.makeAFailed }}, true)
 
+- stage: succeededA
+  condition: or(succeeded(), eq(${{ parameters.skipA }}, true))
+  dependsOn:
+  - SubA1
+  - SubA2
+  displayName: 'Succeeded or Failed SubA1 and SubA2'
+  jobs:
+  - job: suceededAJob
+    steps:
+    - checkout: none
+    - bash: echo 'dependsOn SubA1 and SubA2 and condition is succeeded'
+    - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Succeeded"
+      name: testPassed
+
 - stage: B
   condition: eq(${{ parameters.skipB }}, false)
   jobs:
@@ -98,27 +112,12 @@ stages:
     steps:
     - checkout: none
 
-
-- stage: succeededA
-  condition: or(succeeded(), eq(${{ parameters.skipA }}, true))
-  dependsOn:
-  - SubA1
-  - SubA2
-  displayName: 'Trigger when SubA1 and SubA2 succeeded'
-  jobs:
-  - job: suceededAJob
-    steps:
-    - checkout: none
-    - bash: echo 'dependsOn SubA1 and SubA2 and condition is succeeded'
-    - bash: echo "##vso[task.setvariable variable=testPassed;isOutput=true]Succeeded"
-      name: testPassed
-
 - stage: succeededB
   condition: or(succeeded(), eq(${{ parameters.skipB }}, true))
   dependsOn:
   - SubB1
   - SubB2
-  displayName: 'Trigger when SubB1 and SubB2 succeeded'
+  displayName: 'Succeeded or Failed SubB1 and SubB2'
   jobs:
   - job: suceededBJob
     steps:
