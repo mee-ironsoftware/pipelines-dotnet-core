@@ -141,21 +141,16 @@ stages:
           eq(stageDependencies.succeededA.suceededAJob.outputs['testPassed.testPassed'], 'Succeeded'),
           eq(stageDependencies.succeededB.suceededBJob.outputs['testPassed.testPassed'], 'Succeeded')
         )]
-      status: $[if(and(
-                eq(stageDependencies.succeededA.suceededAJob.outputs['testPassed.testPassed'], 'Succeeded'), 
-                eq(stageDependencies.succeededB.suceededBJob.outputs['testPassed.testPassed'], 'Succeeded')), 
-                'Succeeded', 
-                'Failed'
-              )]
     steps:
       - bash: echo '$(dockerPortNumber)'
       - bash: echo 'JobStatus >>>>> $(stageDependencies.A.A1.JobStatus)'
       - bash: echo '$(Build.RequestedForEmail)'
       - bash: echo $(Agent.JobStatus)
       - bash: echo $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
-      - script: |
+      - bash: |
           echo "All Tests Passed ::: $(allTestsPassed)"
-          echo "Status ::: $(status)"
+          PIPELINE_STATUS=$(($allTestsPassed ? 'Succeeded' : 'Failed'))
+          echo "Pipeline status  ::: $PIPELINE_STATUS"
           if [ $(allTestsPassed) == False ]; then
             echo "Some dependent jobs failed or were skipped."
             exit 1
