@@ -43,9 +43,9 @@ stages:
             git push -u origin $(weeklyBranchName)
             
             # Fetch master branch
-            git fetch origin $(Build.SourceBranchName)
+            git fetch origin master
             
-            if [[ $(git diff --name-only origin/$(Build.SourceBranchName)..$(weeklyBranchName)) ]]; then
+            if [[ $(git diff --name-only origin/master..$(weeklyBranchName)) ]]; then
               gh pr create --title "[Automation] Weekly Build $(PipelineStartDate)" --body "This PR includes the weekly build base on \`$(Build.SourceBranchName)\` branch on $(Build.SourceVersion) commit.\nPlease review the IronPdf SmokeTests and merge this PR when ready." --base master
             else
               echo "No changes detected. Skipping pull request creation."
