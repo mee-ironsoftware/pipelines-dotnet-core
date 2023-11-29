@@ -1,3 +1,4 @@
+trigger: none
 schedules:
 - cron: '1 0 * * 6' # Every Saturday 00.01 AM
   displayName: 'Weekly midnight build'
@@ -38,5 +39,5 @@ stages:
             git config --global user.name "DevOps"
             git checkout -b $(weeklyBranchName)
             git push -u origin $(weeklyBranchName)
-            gh pr create --title "[Automation] Weekly Build $(PipelineStartDate)" --body "This PR includes the weekly build for `$(Build.SourceBranchName)` branch on `$(Build.SourceVersion)` commit.\nPlease review the IronPdf SmokeTests and merge this PR when ready." --base $(Build.SourceVersion)
+            gh pr create --title "[Automation] Weekly Build $(PipelineStartDate)" --body "This PR includes the weekly build for $(Build.SourceBranchName) branch on $(Build.SourceVersion) commit.\nPlease review the IronPdf SmokeTests and merge this PR when ready." --base $(Build.SourceVersion)
         displayName: 'CREATE BRANCH & PULL REQUEST'
