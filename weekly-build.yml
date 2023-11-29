@@ -1,0 +1,42 @@
+schedules:
+- cron: '1 0 * * 6' # Every Saturday 00.01 AM
+  displayName: 'Weekly midnight build'
+  branches:
+    include:
+    - develop
+
+variables:
+  - name: Year
+    value: $[format('{0:yyyy}', pipeline.startTime)]
+  - name: Month
+    value: $[format('{0:M}', pipeline.startTime)]
+  - name: Patch
+    value: $[counter(format('{0}.{1}', variables['Year'], variables['Month']), 1)]
+  - name: weeklyBranchName
+    value: 'weekly/$(Year).$(Month).$(Patch)'
+
+pool: 
+  vmImage: 'ubuntu-latest'
+
+stages:
+## 
+  - stage: CreateChromeBranchAndPR
+    displayName: '[CHROME] CHECKOUT AND CREATE WEEKLY BRANCH PR'
+    dependsOn: []
+    jobs: 
+    - job: CreateChromeBranchAndPRJob
+      steps:
+      - checkout: self
+        lfs: true
+        persistCredentials: true
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "Branch name: $(weeklyBranchName)"
+            git config --global user.email "devops@ironsoftware.com"
+            git config --global user.name "DevOps"
+            git checkout -b $(weeklyBranchName)
+            git push -u origin $(weeklyBranchName)
+            gh pr create --title "[Automation] Weekly Build $(PipelineStartDate)" --body "This PR includes the weekly build for `$(Build.SourceBranchName)` branch on `$(Build.SourceVersion)` commit.\nPlease review the IronPdf SmokeTests and merge this PR when ready." --base $(Build.SourceVersion)
+        displayName: 'CREATE BRANCH & PULL REQUEST'
