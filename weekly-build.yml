@@ -18,12 +18,14 @@ variables:
     value: 'weekly/$(Year).$(Month).$(Patch)'
   - name: PipelineStartDate
     value: $[format('{0:dd}/{0:MM}/{0:yyyy} {0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
+  - name: NuGetVersion
+    value: '$(Year).$(Month).0-preview.$(Rev:r)'
 
 pool: 
   vmImage: 'ubuntu-latest'
 
 stages:
-## 
+## Create branch and pr
   - stage: CreateChromeBranchAndPR
     displayName: '[CHROME] CHECKOUT AND CREATE WEEKLY BRANCH PR'
     dependsOn: []
@@ -59,3 +61,14 @@ stages:
         env:
           GH_TOKEN: $(GitHub_PAT)
         displayName: 'CREATE BRANCH & PULL REQUEST'
+## Stage to trigger another pipeline
+  - stage: CreateReleaseVersion
+    displayName: 'CREATE WEEKLY RELEASE VERSION'
+    condition: 
+    dependsOn:
+    - CreateChromeBranchAndPR
+    jobs:
+    - job: CreateReleaseVersionJob
+      steps:
+      - checkout: none
+      - script: echo 'Create release version!'
