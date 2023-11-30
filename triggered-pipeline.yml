@@ -1,0 +1,22 @@
+trigger: none
+pr: none
+resources:
+  pipelines:
+  - pipeline: TestWeeklyBuild
+    source: test-weekly-build
+    trigger:
+      stages:
+      - CreateReleaseVersion
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- ${{ if eq(variables['Build.Reason'], 'BuildCompletion') }}:
+  - script: echo Triggered from test-weekly-build!
+    displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
