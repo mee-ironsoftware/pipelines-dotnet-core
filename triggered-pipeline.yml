@@ -13,7 +13,9 @@ pool:
 
 steps:
 - ${{ if eq(variables['Build.Reason'], 'BuildCompletion') }}:
-  - script: echo Triggered from test-weekly-build!
+  - script: |
+      echo Triggered from test-weekly-build!
+      echo Build reason ::: $(Build.Reason)
     displayName: 'Run a one-line script'
 
 - script: |
