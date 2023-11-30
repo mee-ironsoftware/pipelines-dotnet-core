@@ -7,6 +7,12 @@ schedules:
     include:
     - develop
 
+parameters:
+  - name: skipTriggerPipeline
+    displayName: Skip to trigger Pipeline
+    type: boolean
+    default: False
+
 variables:
   - name: Year
     value: $[format('{0:yyyy}', pipeline.startTime)]
@@ -64,7 +70,7 @@ stages:
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
     displayName: 'CREATE WEEKLY RELEASE VERSION'
-    condition: 
+    condition: eq('${{ parameters.skipTriggerPipeline }}', false)
     dependsOn:
     - CreateChromeBranchAndPR
     jobs:
