@@ -12,7 +12,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- ${{ if eq(variables['Build.Reason'], 'BuildCompletion') }}:
+- ${{ if eq(variables['Build.Reason'], 'ResourceTrigger') }}:
   - script: |
       echo Triggered from test-weekly-build!
     displayName: 'Run a one-line script'
