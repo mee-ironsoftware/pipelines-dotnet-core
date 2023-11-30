@@ -1,15 +1,15 @@
 trigger: none
 pr: none
 schedules:
-- cron: '1 0 * * 6' # Every Saturday 00.01 AM
+- cron: '1 0 * * *' # Every 00.01 AM
   displayName: 'Weekly midnight build'
   branches:
     include:
     - develop
 
 parameters:
-  - name: skipTriggerPipeline
-    displayName: Skip to trigger Pipeline
+  - name: triggerPipeline
+    displayName: Trigger Pipeline
     type: boolean
     default: False
 
@@ -41,36 +41,41 @@ stages:
       - checkout: self
         lfs: true
         persistCredentials: true
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: |
-            echo "Branch name: $(weeklyBranchName)"
-            git config --global user.email "devops@ironsoftware.com"
-            git config --global user.name "DevOps"
-            git checkout -b $(weeklyBranchName)
-            git push -u origin $(weeklyBranchName)
-            
-            # Fetch master branch
-            git fetch origin master
-            
-            if [[ $(git diff --name-only origin/master..$(weeklyBranchName)) ]]; then
-              gh pr create \
-              --title "[Automation] Weekly Build $(PipelineStartDate)" \
-              --body "This PR includes the weekly build base on \`$(Build.SourceBranchName)\` branch on $(Build.SourceVersion) commit.<br>\
-              Please review the IronPdf SmokeTests and merge this PR when ready." \
-              --reviewer mee-ironsoftware \
-              --base master
-            else
-              echo "No changes detected. Skipping pull request creation."
-            fi
-        env:
-          GH_TOKEN: $(GitHub_PAT)
-        displayName: 'CREATE BRANCH & PULL REQUEST'
+      - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo "Branch name: $(weeklyBranchName)"
+              git config --global user.email "devops@ironsoftware.com"
+              git config --global user.name "DevOps"
+              git checkout -b $(weeklyBranchName)
+              git push -u origin $(weeklyBranchName)
+              
+              # Fetch master branch
+              git fetch origin master
+              
+              if [[ $(git diff --name-only origin/master..$(weeklyBranchName)) ]]; then
+                gh pr create \
+                --title "[Automation] Weekly Build $(PipelineStartDate)" \
+                --body "This PR includes the weekly build base on \`$(Build.SourceBranchName)\` branch on $(Build.SourceVersion) commit.<br>\
+                Please review the IronPdf SmokeTests and merge this PR when ready." \
+                --reviewer mee-ironsoftware \
+                --base master
+              else
+                echo "No changes detected. Skipping pull request creation."
+              fi
+          env:
+            GH_TOKEN: $(GitHub_PAT)
+          displayName: 'CREATE BRANCH & PULL REQUEST'
+      - ${{ else }}:
+        - script: echo This pipeline does not trigger by Schedule
+
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
     displayName: 'CREATE WEEKLY RELEASE VERSION'
-    condition: eq('${{ parameters.skipTriggerPipeline }}', false)
+    condition: or(eq('${{ parameters.triggerPipeline }}', true), eq(variables['Build.Reason'], 'Schedule'))
+    # condition: ne(variables['Build.Reason'], 'ResourceTrigger')
     dependsOn:
     - CreateChromeBranchAndPR
     jobs:
