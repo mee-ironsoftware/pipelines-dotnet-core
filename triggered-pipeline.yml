@@ -20,3 +20,4 @@ steps:
 - script: |
     echo Build reason ::: $(Build.Reason)
   displayName: 'Run a multi-line script'
+  condition: ne(variables['Build.Reason'], 'ResourceTrigger')
