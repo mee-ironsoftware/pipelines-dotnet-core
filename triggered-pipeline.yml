@@ -8,14 +8,44 @@ resources:
       stages:
       - CreateReleaseVersion
 
+variables:
+- name: Configuration
+  value: 'Debug'
+- name: NuGetVersion
+  value: '1.0.0'
+- name: AssemblyVersion
+  value: '1.0.0.0'
+
 pool:
   vmImage: ubuntu-latest
 
 steps:
 - ${{ if eq(variables['Build.Reason'], 'ResourceTrigger') }}:
   - script: |
-      echo Triggered from test-weekly-build!
-    displayName: 'Run a one-line script'
+      echo 'CI build denition id: $(resources.pipeline.TestWeeklyBuild.pipelineID)'
+      echo 'CI build number: $(resources.pipeline.TestWeeklyBuild.runName)'
+      echo 'CI build id: $(resources.pipeline.TestWeeklyBuild.runID)'
+      echo 'CI build run url: $(resources.pipeline.TestWeeklyBuild.runURI)'
+      echo 'CI build branch: $(resources.pipeline.TestWeeklyBuild.sourceBranch)'
+      echo 'CI build commit: $(resources.pipeline.TestWeeklyBuild.sourceCommit)'
+      echo 'CI build source provider: $(resources.pipeline.TestWeeklyBuild.sourceProvider)'
+      echo 'CI build requested by user name: $(resources.pipeline.TestWeeklyBuild.requestedFor)'
+      echo 'CI build requested by user id: $(resources.pipeline.TestWeeklyBuild.requestedForID)'
+  # Download Version from Build pipeline
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'specific'
+      project: 'IronPDF'
+      definition: '$(resources.pipeline.TestWeeklyBuild.pipelineID)'
+      artifactName: 'Versions'
+      targetPath: '$(Agent.BuildDirectory)/Versions'
+      buildVersionToDownload: 'specific'
+      pipelineId: $(resources.pipeline.TestWeeklyBuild.runID)
+  # - script: |
+  #     echo "##vso[task.setvariable variable=Configuration;isOutput=true]de"
+  #     echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]this is a stage output variable"
+  #     echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]this is a stage output variable"
+  #   name: SetVariables
 
 - script: |
     echo Build reason ::: $(Build.Reason)
