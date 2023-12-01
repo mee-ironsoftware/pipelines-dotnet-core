@@ -1,7 +1,7 @@
 trigger: none
 pr: none
 schedules:
-- cron: '39 3 * * *'
+- cron: '43 3 * * *'
   displayName: 'Weekly midnight build'
   branches:
     include:
@@ -25,7 +25,7 @@ variables:
   - name: PipelineStartDate
     value: $[format('{0:dd}/{0:MM}/{0:yyyy} {0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
   - name: NuGetVersion
-    value: '$(Year).$(Month).0-preview.$(Rev:r)'
+    value: '$(Year).$(Month).0-preview.$(Patch)'
   - name: AssemblyVersion
     value: '$(Year).$(Month).0.0'
 
