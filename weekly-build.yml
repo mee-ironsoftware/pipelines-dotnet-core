@@ -1,7 +1,7 @@
 trigger: none
 pr: none
 schedules:
-- cron: '43 3 * * *'
+- cron: '0 4 * * *'
   displayName: 'Weekly midnight build'
   branches:
     include:
@@ -43,7 +43,7 @@ stages:
       - checkout: self
         lfs: true
         persistCredentials: true
-      - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+      - ${{ if ne(variables['Build.Reason'], 'Schedule') }}:
         - task: Bash@3
           inputs:
             targetType: 'inline'
@@ -97,6 +97,7 @@ stages:
               <Configuration>Release</Configuration>
               <NuGetVersion>$(NuGetVersion)</NuGetVersion>
               <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
+              <BuildVersion>$(Patch)</BuildVersion>
               <GitCommitHash>$(Build.SourceVersion)</GitCommitHash>
             </Versions>
           fileoverwrite: true
