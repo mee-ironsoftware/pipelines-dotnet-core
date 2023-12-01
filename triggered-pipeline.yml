@@ -68,6 +68,11 @@ stages:
       displayName: 'Run a multi-line script'
       condition: ne(variables['Build.Reason'], 'ResourceTrigger')
     - script: |
+        echo Configuration $(Configuration)
+        echo NuGetVersion $(NuGetVersion)
+        echo AssemblyVersion $(AssemblyVersion)
+      displayName: 'DISPLAY DEFAULT VAR'
+    - script: |
         echo Configuration $(SetVariables.Configuration)
         echo NuGetVersion $(SetVariables.NuGetVersion)
         echo AssemblyVersion $(SetVariables.AssemblyVersion)
