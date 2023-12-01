@@ -1,7 +1,7 @@
 trigger: none
 pr: none
 schedules:
-- cron: '34 3 * * *'
+- cron: '39 3 * * *'
   displayName: 'Weekly midnight build'
   branches:
     include:
@@ -84,7 +84,9 @@ stages:
     - job: CreateReleaseVersionJob
       steps:
       - checkout: none
-      - script: echo 'Create release version!'
+      - script: |
+          echo 'NuGetVersion: "$(NuGetVersion)"'
+          echo 'AssemblyVersion: "$(AssemblyVersion)"'
       - task: file-creator@6
         displayName: 'STORE VERSION INFORMATION'
         inputs:
