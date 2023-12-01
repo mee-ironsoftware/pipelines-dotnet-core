@@ -19,35 +19,68 @@ variables:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- ${{ if eq(variables['Build.Reason'], 'ResourceTrigger') }}:
-  - script: |
-      echo 'CI build denition id: $(resources.pipeline.TestWeeklyBuild.pipelineID)'
-      echo 'CI build number: $(resources.pipeline.TestWeeklyBuild.runName)'
-      echo 'CI build id: $(resources.pipeline.TestWeeklyBuild.runID)'
-      echo 'CI build run url: $(resources.pipeline.TestWeeklyBuild.runURI)'
-      echo 'CI build branch: $(resources.pipeline.TestWeeklyBuild.sourceBranch)'
-      echo 'CI build commit: $(resources.pipeline.TestWeeklyBuild.sourceCommit)'
-      echo 'CI build source provider: $(resources.pipeline.TestWeeklyBuild.sourceProvider)'
-      echo 'CI build requested by user name: $(resources.pipeline.TestWeeklyBuild.requestedFor)'
-      echo 'CI build requested by user id: $(resources.pipeline.TestWeeklyBuild.requestedForID)'
-  # Download Version from Build pipeline
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      buildType: 'specific'
-      project: 'IronPDF'
-      definition: '$(resources.pipeline.TestWeeklyBuild.pipelineID)'
-      artifactName: 'Versions'
-      targetPath: '$(Agent.BuildDirectory)/Versions'
-      buildVersionToDownload: 'specific'
-      pipelineId: $(resources.pipeline.TestWeeklyBuild.runID)
-  # - script: |
-  #     echo "##vso[task.setvariable variable=Configuration;isOutput=true]de"
-  #     echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]this is a stage output variable"
-  #     echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]this is a stage output variable"
-  #   name: SetVariables
+stages:
+- stage: GatheringVar
+  jobs:
+  - job: GatheringVarJob
+    steps:
+    - ${{ if eq(variables['Build.Reason'], 'ResourceTrigger') }}:
+      - script: |
+          echo 'CI build denition id: $(resources.pipeline.TestWeeklyBuild.pipelineID)'
+          echo 'CI build number: $(resources.pipeline.TestWeeklyBuild.runName)'
+          echo 'CI build id: $(resources.pipeline.TestWeeklyBuild.runID)'
+          echo 'CI build run url: $(resources.pipeline.TestWeeklyBuild.runURI)'
+          echo 'CI build branch: $(resources.pipeline.TestWeeklyBuild.sourceBranch)'
+          echo 'CI build commit: $(resources.pipeline.TestWeeklyBuild.sourceCommit)'
+          echo 'CI build source provider: $(resources.pipeline.TestWeeklyBuild.sourceProvider)'
+          echo 'CI build requested by user name: $(resources.pipeline.TestWeeklyBuild.requestedFor)'
+          echo 'CI build requested by user id: $(resources.pipeline.TestWeeklyBuild.requestedForID)'
+      # Download Version from Build pipeline
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'specific'
+          project: 'IronPDF'
+          definition: '$(resources.pipeline.TestWeeklyBuild.pipelineID)'
+          artifactName: 'Versions'
+          targetPath: '$(Agent.BuildDirectory)/Versions'
+          buildVersionToDownload: 'specific'
+          pipelineId: $(resources.pipeline.TestWeeklyBuild.runID)
+      - task: LoadXmlVariables@2
+        displayName: 'LOAD VERSION INFORMATION'
+        inputs:
+          XmlSource: '$(Agent.BuildDirectory)/Versions/versions.xml'
+          VariablePrefix: 'dep'
+          MarkAsSecret: false
+      - script: |
+          echo "##vso[task.setvariable variable=Configuration;isOutput=true]$(dep_Versions_Configuration)"
+          echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$(dep_Versions_NuGetVersion)"
+          echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$(dep_Versions_AssemblyVersion)"
+        name: SetVariables
+    - ${{ else }}:
+      - script: |
+          echo "##vso[task.setvariable variable=Configuration;isOutput=true]$(Configuration)"
+          echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$(NuGetVersion)"
+          echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$(AssemblyVersion)"
+        name: SetVariables
 
-- script: |
-    echo Build reason ::: $(Build.Reason)
-  displayName: 'Run a multi-line script'
-  condition: ne(variables['Build.Reason'], 'ResourceTrigger')
+    - script: |
+        echo Build reason ::: $(Build.Reason)
+      displayName: 'Run a multi-line script'
+      condition: ne(variables['Build.Reason'], 'ResourceTrigger')
+    - script: |
+        echo Configuration $(SetVariables.Configuration)
+        echo NuGetVersion $(SetVariables.NuGetVersion)
+        echo AssemblyVersion $(SetVariables.AssemblyVersion)
+
+- stage: UsingVar
+  jobs:
+  - job: UsingVarJob
+    variables:
+      Configuration: $[stageDependencies.GatheringVar.GatheringVarJob.outputs['SetVariables.Configuration']]
+      NuGetVersion: $[stageDependencies.GatheringVar.GatheringVarJob.outputs['SetVariables.NuGetVersion']]
+      AssemblyVersion: $[stageDependencies.GatheringVar.GatheringVarJob.outputs['SetVariables.AssemblyVersion']]
+    steps:
+    - script: |
+        echo Configuration $(Configuration)
+        echo NuGetVersion $(NuGetVersion)
+        echo AssemblyVersion $(AssemblyVersion)
