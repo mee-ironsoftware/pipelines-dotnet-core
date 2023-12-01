@@ -39,7 +39,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           buildType: 'specific'
-          project: 'IronPDF'
+          project: 'DevOpsTraining'
           definition: '$(resources.pipeline.TestWeeklyBuild.pipelineID)'
           artifactName: 'Versions'
           targetPath: '$(Agent.BuildDirectory)/Versions'
