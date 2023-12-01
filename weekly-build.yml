@@ -1,7 +1,7 @@
 trigger: none
 pr: none
 schedules:
-- cron: '1 0 * * *' # Every 00.01 AM
+- cron: '0 10 * * *'
   displayName: 'Weekly midnight build'
   branches:
     include:
@@ -26,6 +26,8 @@ variables:
     value: $[format('{0:dd}/{0:MM}/{0:yyyy} {0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
   - name: NuGetVersion
     value: '$(Year).$(Month).0-preview.$(Rev:r)'
+  - name: AssemblyVersion
+    value: '$(Year).$(Month).0.0'
 
 pool: 
   vmImage: 'ubuntu-latest'
@@ -83,3 +85,24 @@ stages:
       steps:
       - checkout: none
       - script: echo 'Create release version!'
+      - task: file-creator@6
+        displayName: 'STORE VERSION INFORMATION'
+        inputs:
+          filepath: 'VersionInformation/versions.xml'
+          filecontent: |
+            <?xml version="1.0" encoding="utf-8"?>
+            <Versions>
+              <Configuration>Release</Configuration>
+              <NuGetVersion>$(NuGetVersion)</NuGetVersion>
+              <AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
+              <GitCommitHash>$(Build.SourceVersion)</GitCommitHash>
+            </Versions>
+          fileoverwrite: true
+          verbose: true
+      # publish artifacts
+      - task: PublishPipelineArtifact@1
+        displayName: 'PUBLISH VERSION INFORMATION'
+        inputs:
+          targetPath: 'VersionInformation'
+          artifact: 'Versions'
+          publishLocation: 'pipeline'
