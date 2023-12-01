@@ -76,6 +76,7 @@ stages:
         echo Configuration $(SetVariables.Configuration)
         echo NuGetVersion $(SetVariables.NuGetVersion)
         echo AssemblyVersion $(SetVariables.AssemblyVersion)
+      displayName: 'DISPLAY STEP VAR'
 
 - stage: UsingVar
   jobs:
