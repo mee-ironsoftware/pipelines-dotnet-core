@@ -1,7 +1,7 @@
 trigger: none
 pr: none
 schedules:
-- cron: '52 3 * * *'
+- cron: '52 6 * * *'
   displayName: 'Weekly midnight build'
   branches:
     include:
@@ -52,6 +52,10 @@ stages:
               git config --global user.email "devops@ironsoftware.com"
               git config --global user.name "DevOps"
               git checkout -b $(weeklyBranchName)
+
+              # Tagging Version
+              git tag -a v$(NuGetVersion) HEAD -m "Tagging weekly preview version $(NuGetVersion)"
+
               git push -u origin $(weeklyBranchName)
               
               # Fetch master branch
