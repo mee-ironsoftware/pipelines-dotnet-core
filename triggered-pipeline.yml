@@ -85,10 +85,10 @@ stages:
         echo AssemblyVersion $(SetVariables.AssemblyVersion)
       displayName: 'DISPLAY STEP VAR'
     - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
-      condition: and(succeeded(), ne('${{ parameters.ChromeRendererPackageVersion }}', 'ResourceTrigger'))
+      condition: and(succeeded(), eq('${{ parameters.ChromeRendererPackageVersion }}', 'ResourceTrigger'))
       displayName: 'ChromeRendererPackageVersion is ResourceTrigger'
     - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
-      condition: and(succeeded(), ne('${{ parameters.ChromeRendererPackageVersion }}', 'default'))
+      condition: and(succeeded(), eq('${{ parameters.ChromeRendererPackageVersion }}', 'default'))
       displayName: 'ChromeRendererPackageVersion is default'
 
 - stage: UsingVar
