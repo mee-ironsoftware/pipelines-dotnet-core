@@ -8,6 +8,12 @@ resources:
       stages:
       - CreateReleaseVersion
 
+parameters:
+  - name: ChromeRendererPackageVersion
+    displayName: Chrome Renderer Package Version
+    type: string
+    default: default
+
 variables:
 - name: Configuration
   value: 'Debug'
@@ -55,12 +61,14 @@ stages:
           echo "##vso[task.setvariable variable=Configuration;isOutput=true]$(dep_Versions_Configuration)"
           echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$(dep_Versions_NuGetVersion)"
           echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$(dep_Versions_AssemblyVersion)"
+          echo "##vso[task.setvariable variable=ChromeRendererPackageVersion;isOutput=true]ResourceTrigger"
         name: SetVariables
     - ${{ else }}:
       - script: |
           echo "##vso[task.setvariable variable=Configuration;isOutput=true]$(Configuration)"
           echo "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$(NuGetVersion)"
           echo "##vso[task.setvariable variable=AssemblyVersion;isOutput=true]$(AssemblyVersion)"
+          echo "##vso[task.setvariable variable=ChromeRendererPackageVersion;isOutput=true]${{ parameters.ChromeRendererPackageVersion }}"
         name: SetVariables
 
     - script: |
@@ -77,6 +85,12 @@ stages:
         echo NuGetVersion $(SetVariables.NuGetVersion)
         echo AssemblyVersion $(SetVariables.AssemblyVersion)
       displayName: 'DISPLAY STEP VAR'
+    - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
+      condition: and(succeeded(), ne('${{ parameters.ChromeRendererPackageVersion }}', 'ResourceTrigger'))
+      displayName: 'ChromeRendererPackageVersion is ResourceTrigger'
+    - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
+      condition: and(succeeded(), ne('${{ parameters.ChromeRendererPackageVersion }}', 'default'))
+      displayName: 'ChromeRendererPackageVersion is default'
 
 - stage: UsingVar
   jobs:
