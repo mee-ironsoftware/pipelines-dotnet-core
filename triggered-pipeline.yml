@@ -90,7 +90,7 @@ stages:
     - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
       condition: and(succeeded(), eq(variables['SetVariables.ChromeRendererPackageVersion'], 'default'))
       displayName: 'ChromeRendererPackageVersion is default'
-    - ${{ if eq($(SetVariables.ChromeRendererPackageVersion), 'ResourceTrigger') }}:
+    - ${{ if eq(variables['SetVariables.ChromeRendererPackageVersion'], 'ResourceTrigger') }}:
       - script: echo "Run ResourceTrigger in expression condition"
 
 - stage: UsingVar
