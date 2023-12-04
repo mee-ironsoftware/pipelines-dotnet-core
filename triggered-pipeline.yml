@@ -85,12 +85,12 @@ stages:
         echo AssemblyVersion $(SetVariables.AssemblyVersion)
       displayName: 'DISPLAY STEP VAR'
     - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
-      condition: and(succeeded(), eq('${{ parameters.ChromeRendererPackageVersion }}', 'ResourceTrigger'))
+      condition: and(succeeded(), eq(variables['SetVariables.ChromeRendererPackageVersion'], 'ResourceTrigger'))
       displayName: 'ChromeRendererPackageVersion is ResourceTrigger'
     - script: echo "Run $(SetVariables.ChromeRendererPackageVersion)"
-      condition: and(succeeded(), eq('${{ parameters.ChromeRendererPackageVersion }}', 'default'))
+      condition: and(succeeded(), eq(variables['SetVariables.ChromeRendererPackageVersion'], 'default'))
       displayName: 'ChromeRendererPackageVersion is default'
-    - ${{ if eq('${{ parameters.ChromeRendererPackageVersion }}', 'ResourceTrigger') }}:
+    - ${{ if eq($(SetVariables.ChromeRendererPackageVersion), 'ResourceTrigger') }}:
       - script: echo "Run ResourceTrigger in expression condition"
 
 - stage: UsingVar
