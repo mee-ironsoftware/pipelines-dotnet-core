@@ -108,7 +108,7 @@ stages:
         inputs:
           buildType: 'current'
           artifactName: 'AssemblyVersion'
-          targetPath: '$(Agent.BuildDirectory)\IronWord\IronWord\bin\Version'
+          targetPath: '$(Agent.BuildDirectory)/IronWord/IronWord/bin/Version'
       - task: Bash@3
         inputs:
           targetType: 'inline'
