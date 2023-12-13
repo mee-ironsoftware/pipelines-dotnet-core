@@ -108,7 +108,7 @@ stages:
         inputs:
           buildType: 'current'
           artifactName: 'AssemblyVersion'
-          targetPath: '$(Agent.BuildDirectory)\Version'
+          targetPath: '$(Agent.BuildDirectory)\IronWord\IronWord\bin\Version'
 
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
