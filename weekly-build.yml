@@ -100,6 +100,8 @@ stages:
       - ${{ else }}:
         - script: echo This pipeline does not trigger by Schedule
     - job: TestDownloadArtifact
+      dependsOn:
+      - CreateChromeBranchAndPR
       steps:
       - checkout: none
       - task: DownloadPipelineArtifact@2
