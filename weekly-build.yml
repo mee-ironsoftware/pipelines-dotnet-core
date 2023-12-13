@@ -101,7 +101,7 @@ stages:
         - script: echo This pipeline does not trigger by Schedule
     - job: TestDownloadArtifact
       dependsOn:
-      - CreateChromeBranchAndPR
+      - CreateChromeBranchAndPRJob
       steps:
       - checkout: none
       - task: DownloadPipelineArtifact@2
