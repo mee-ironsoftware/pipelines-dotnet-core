@@ -54,11 +54,17 @@ stages:
             $splitVersion = "${{ parameters.inputNuGetVersion }}".Split('.')
             $AssemblyVersion = "$($splitVersion[0]).$($splitVersion[1]).0.$($splitVersion[2])"
           }
-
+          Set-Content -Path "AssemblyVersion.txt" -Value $AssemblyVersion
           Write-Host "##vso[task.setvariable variable=AssemblyVersion]$AssemblyVersion"
         displayName: 'Generate Assembly version'
       - script: echo 'Using the Assembly version variable >> $(AssemblyVersion)'
         displayName: 'Use Assembly version in another task'
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Assemblies'
+        inputs:
+          targetPath: 'AssemblyVersion.txt'
+          artifact: 'AssemblyVersion'
+          publishLocation: 'pipeline'
 
       - ${{ if ne(variables['Build.Reason'], 'Schedule') }}:
         - task: Bash@3
@@ -93,6 +99,14 @@ stages:
           displayName: 'CREATE BRANCH & PULL REQUEST'
       - ${{ else }}:
         - script: echo This pipeline does not trigger by Schedule
+    - job: TestDownloadArtifact
+      steps:
+      - checkout: none
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'AssemblyVersion'
+          targetPath: '$(Agent.BuildDirectory)\Version'
 
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
