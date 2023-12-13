@@ -12,6 +12,10 @@ parameters:
     displayName: Trigger Pipeline
     type: boolean
     default: False
+  - name: inputNuGetVersion
+    displayName: NuGet-Version (This will ignore Pre-Release checkbox when specify NuGet version.)
+    type: string
+    default: '0'
 
 variables:
   - name: Year
@@ -43,6 +47,19 @@ stages:
       - checkout: self
         lfs: true
         persistCredentials: true
+      - powershell: |
+          if ("${{ parameters.inputNuGetVersion }}" -eq "0") {
+            $AssemblyVersion = $(AssemblyVersion)
+          } else {
+            $splitVersion = "${{ parameters.inputNuGetVersion }}".Split('.')
+            $AssemblyVersion = "$($splitVersion[0]).$($splitVersion[1]).0.$($splitVersion[2])"
+          }
+
+          Write-Host "##vso[task.setvariable variable=AssemblyVersion]$AssemblyVersion"
+        displayName: 'Generate Assembly version'
+      - script: echo 'Using the Assembly version variable >> $(AssemblyVersion)'
+        displayName: 'Use Assembly version in another task'
+
       - ${{ if ne(variables['Build.Reason'], 'Schedule') }}:
         - task: Bash@3
           inputs:
