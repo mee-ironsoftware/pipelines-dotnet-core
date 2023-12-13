@@ -112,7 +112,7 @@ stages:
       - task: Bash@3
         inputs:
           targetType: 'inline'
-          script: 'cat $(Agent.BuildDirectory)\IronWord\IronWord\bin\Version\AssemblyVersion.txt'
+          script: 'cat $(Agent.BuildDirectory)/IronWord/IronWord/bin/Version/AssemblyVersion.txt'
 
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
