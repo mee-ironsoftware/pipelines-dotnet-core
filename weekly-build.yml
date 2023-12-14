@@ -99,6 +99,16 @@ stages:
           displayName: 'CREATE BRANCH & PULL REQUEST'
       - ${{ else }}:
         - script: echo This pipeline does not trigger by Schedule
+            
+      ### Install NuGet tool
+      - task: NuGetToolInstaller@1
+        displayName: Install NuGet Manager
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            nuget.exe -h
+
     - job: TestDownloadArtifact
       dependsOn:
       - CreateChromeBranchAndPRJob
