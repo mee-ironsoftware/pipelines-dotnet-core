@@ -107,7 +107,7 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-            nuget.exe -h
+            nuget.exe help
 
     - job: TestDownloadArtifact
       dependsOn:
