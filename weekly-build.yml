@@ -12,6 +12,10 @@ parameters:
     displayName: Trigger Pipeline
     type: boolean
     default: False
+  - name: triggerSecondPipeline
+    displayName: Trigger Second Pipeline
+    type: boolean
+    default: False
   - name: inputNuGetVersion
     displayName: NuGet-Version (This will ignore Pre-Release checkbox when specify NuGet version.)
     type: string
@@ -127,7 +131,7 @@ stages:
 ## Stage to trigger another pipeline
   - stage: CreateReleaseVersion
     displayName: 'CREATE WEEKLY RELEASE VERSION'
-    condition: or(eq('${{ parameters.triggerPipeline }}', true), eq(variables['Build.Reason'], 'Schedule'))
+    condition: or(( and( eq('${{ parameters.triggerPipeline }}', true), eq('${{ parameters.triggerSecondPipeline }}', false) ), eq(variables['Build.Reason'], 'Schedule'))
     # condition: ne(variables['Build.Reason'], 'ResourceTrigger')
     dependsOn:
     - CreateChromeBranchAndPR
@@ -160,3 +164,13 @@ stages:
           targetPath: 'VersionInformation'
           artifact: 'Versions'
           publishLocation: 'pipeline'
+  - stage: TriggerAnother
+    displayName: 'Trigger another pipeline'
+    condition: or( and( eq('${{ parameters.triggerPipeline }}', true), eq('${{ parameters.triggerSecondPipeline }}', true) ), eq(variables['Build.Reason'], 'Schedule'))
+    dependsOn:
+    - CreateChromeBranchAndPR
+    jobs:
+    - job: TriggerAnotherJob
+      steps:
+      - checkout: none
+      - script: echo 'Trigger another Job in another Pipeline'
