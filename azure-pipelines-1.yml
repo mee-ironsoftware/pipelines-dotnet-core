@@ -1,0 +1,13 @@
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- script: |
+    choco install vswhere
+    for /f "tokens=*" %%i in ('vswhere -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe -nologo') do set msbuildpath="%%i"
+
+    echo "MSBuild Path: %msbuildpath%"
+    echo "##vso[task.setvariable variable=msbuildpath]%msbuildpath%"
+  displayName: 'Run a multi-line script'
