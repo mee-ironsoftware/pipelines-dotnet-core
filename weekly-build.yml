@@ -1,11 +1,11 @@
 trigger: none
 pr: none
-schedules:
-- cron: '52 6 * * *'
-  displayName: 'Weekly midnight build'
-  branches:
-    include:
-    - develop
+# schedules:
+# - cron: '52 6 * * *'
+#   displayName: 'Weekly midnight build'
+#   branches:
+#     include:
+#     - develop
 
 parameters:
   - name: triggerPipeline
